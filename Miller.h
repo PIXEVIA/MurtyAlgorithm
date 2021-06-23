@@ -19,15 +19,14 @@
 #include <queue>
 
 
-template<typename Scalar = double>
 class MurtyMiller
 {
 public:
 
-    typedef Eigen::Matrix<Scalar, -1, -1> WeightMatrix;
+    typedef Eigen::Matrix<double, -1, -1> WeightMatrix;
     typedef Eigen::Matrix<size_t, -1, -1> AssignmentMatrix;
-    typedef typename Auction<Scalar>::Edge Edge;
-    typedef typename Auction<Scalar>::Edges Edges;
+    typedef typename Auction::Edge Edge;
+    typedef typename Auction::Edges Edges;
 
     /**
      * a partition represents an assignment matrix (i.e. edges)
@@ -42,13 +41,13 @@ public:
             w = WeightMatrix::Zero(w.rows(), w.cols());
         }
 
-        Partition(const Edges & edges, const WeightMatrix & w, const Scalar v) :
+        Partition(const Edges & edges, const WeightMatrix & w, const double v) :
             edges(edges), w(w), value(v)
         {}
 
         Edges edges;
         WeightMatrix w;
-        Scalar value;
+        double value;
     };
 
     struct ComparePartition: std::binary_function<Partition,Partition,bool>
@@ -69,9 +68,9 @@ public:
      * @param edges
      * @return
      */
-    static Scalar objectiveFunctionValue(const Edges & edges )
+    static double objectiveFunctionValue(const Edges & edges )
     {
-        Scalar v = 0;
+        double v = 0;
         for ( const auto & e : edges )
             v += e.v;
 
@@ -113,7 +112,7 @@ public:
 
         // std::cout << "kBest = " << kBest << std::endl;
 
-        Edges edges = Auction<Scalar>::solve(w); // make initial (best) assignment
+        Edges edges = Auction::solve(w); // make initial (best) assignment
 
         // sort edges by row
         std::sort(edges.begin(), edges.end(), [](const Edge & e1, const Edge & e2) {return e1.x < e2.x;});
@@ -128,7 +127,7 @@ public:
         priorityQueue.push(init);
 
         // assume values between 0 and 1 !
-        const Scalar lockingValue = 0.;
+        const double lockingValue = 0.;
 
         while ( !priorityQueue.empty() && answerList.size() < kBest )
         {
@@ -149,7 +148,7 @@ public:
                 P_(triplet.x, triplet.y) = lockingValue;
 
                 // determine solution for changed matrix and create partition
-                Edges S_ = Auction<Scalar>::solve(P_);
+                Edges S_ = Auction::solve(P_);
 
 #ifdef __ASSOCIATON_FINDER_DEBUG
                 for (const auto & t : currentPartition.edges)

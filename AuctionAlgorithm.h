@@ -16,7 +16,6 @@
 //#define __AUCTION_OMIT_ZEROS
 #define __AUCTION_ZERO 0.
 
-template<typename Scalar = double>
 class Auction
 {
 private:
@@ -26,7 +25,7 @@ private:
     virtual ~Auction(){}
 public:
 
-    typedef Eigen::Matrix<Scalar, -1, -1> WeightMatrix;
+    typedef Eigen::Matrix<double, -1, -1> WeightMatrix;
 
     /**
      * solver modes for association problem
@@ -43,12 +42,12 @@ public:
     {
     public:
         Edge() : x(0), y(0), v(0) {}
-        Edge(const size_t x, const size_t y, const Scalar v) :
+        Edge(const size_t x, const size_t y, const double v) :
                 x(x), y(y), v(v) {}
 
         size_t x;
         size_t y;
-        Scalar v;
+        double v;
     };
 
 
@@ -61,7 +60,7 @@ public:
 	/**
 	 * vector of scalars (prices, profits, ...)
 	 */
-	typedef std::vector<Scalar> Scalars;
+	typedef std::vector<double> Scalars;
 
 	/**
 	 * vector of bools for row/column-locking
@@ -73,7 +72,7 @@ public:
 	 */
 	typedef std::vector<size_t> indices;
 
-	static const Edges solve(const Eigen::Matrix<Scalar, -1, -1> & a)
+	static const Edges solve(const Eigen::Matrix<double, -1, -1> & a)
 	{
 		const size_t rows = a.rows();
 		const size_t cols = a.cols();
@@ -82,8 +81,8 @@ public:
 		Locks lockedCols(a.cols(), false);
 		Edges E;
 
-		Scalar lambda = .0;
-		Scalar epsilon = __AUCTION_EPSILON_MULTIPLIER / a.cols();
+		double lambda = .0;
+		double epsilon = __AUCTION_EPSILON_MULTIPLIER / a.cols();
 
 		// condition 3: initially set p_j >= lambda
 		Scalars prices(cols, 0.), profits(rows, 1.); // p-Vector  (1 to j) = p_j
@@ -144,9 +143,9 @@ private:
 	 * @param epsilon bidding increment
 	 * @return true if assignment was made, false otherwise
 	 */
-	static bool forward(const Eigen::Matrix<Scalar, -1, -1> & a, Edges & E,
+	static bool forward(const Eigen::Matrix<double, -1, -1> & a, Edges & E,
 			Scalars & prices, Scalars & profits, Locks & lockedRows,
-			Locks & lockedCols, Scalar & lambda, Scalar & epsilon)
+			Locks & lockedCols, double & lambda, double & epsilon)
 	{
 #ifdef __AUCTION_DEBUG
 		__A_FORWARD_LOG << "forwarding ..." << std::endl;
@@ -178,16 +177,16 @@ private:
 			//  v_i was already found = v_i
 			//	w_i = max { a_ij - p_j} for j in A(i) and j != j_i  // second best profit
 			//	if j_i is the only entry in A(i), w_i = - inf       // there's no second best profit
-			Scalar w_i = -__AUCTION_INF, v_i = -__AUCTION_INF, a_i_ji = 0.;	// = max { a_ij - p_j}
+			double w_i = -__AUCTION_INF, v_i = -__AUCTION_INF, a_i_ji = 0.;	// = max { a_ij - p_j}
 
 			// find maximum profit i.e. j_i = arg max { a_ij - p_j} and second best
 			for (size_t j = 0; j < cols; j++) // for the j-th column
 			{
-				const Scalar aij = a(i,j);
+				const double aij = a(i,j);
 #ifndef __AUCTION_OMIT_ZEROS
 				if ( aij == __AUCTION_ZERO ) continue;
 #endif
-				const Scalar diff = aij - prices[j];
+				const double diff = aij - prices[j];
 #ifdef __AUCTION_DEBUG
 			__A_FORWARD_LOG << "  col " << j << " diff = " << diff << std::endl;
 #endif
@@ -223,7 +222,7 @@ private:
 			assignmentInThisIterationFound = false;
 
 //			std::cout << "assignment found .." << std::endl;
-			const Scalar bid = a_i_ji - w_i + epsilon;
+			const double bid = a_i_ji - w_i + epsilon;
 
 			//	P_i = w_i - E
 			profits[i] = w_i - epsilon; // set new profit for person
@@ -286,9 +285,9 @@ private:
 	 * @param epsilon bidding increment
 	 * @return true if assignment was made, false otherwise
 	 */
-	static bool reverse(const Eigen::Matrix<Scalar, -1, -1> & a, Edges & E,
+	static bool reverse(const Eigen::Matrix<double, -1, -1> & a, Edges & E,
 			Scalars & prices, Scalars & profits, Locks & lockedRows,
-			Locks & lockedCols, Scalar & lambda, const Scalar & epsilon)
+			Locks & lockedCols, double & lambda, const double & epsilon)
 	{
 #ifdef __AUCTION_DEBUG
 		__A_REVERSE_LOG << "reversing ..." << std::endl;
@@ -316,16 +315,16 @@ private:
 			//g_j = max {a_ij - P_i} for i in B(j) and i != i_j
 			// if j_i is the only entry in B(j), g_j = - inf ( g_j < b_j)
 			//b_j = max {a_ij - P_i} for i in B(j)
-			Scalar b_j = -__AUCTION_INF, g_j = -__AUCTION_INF, a_ij_j = 0.;
+			double b_j = -__AUCTION_INF, g_j = -__AUCTION_INF, a_ij_j = 0.;
 
 			// find maximum profit i.e. j_i = arg max { a_ij - p_j} and second best
 			for (size_t i = 0; i < rows; i++) // for the j-th column
 			{
-				const Scalar aij = a(i, j);
+				const double aij = a(i, j);
 #ifndef __AUCTION_OMIT_ZEROS
 				if ( aij == __AUCTION_ZERO ) continue;
 #endif
-				const Scalar diff = aij - profits[i];
+				const double diff = aij - profits[i];
 				if (diff > b_j)
 				{
 					// if there already was an entry found, this is the second best
@@ -360,9 +359,9 @@ private:
 #ifdef __AUCTION_DEBUG
 				__A_REVERSE_LOG << "b_j >= lambda + epsilon" << std::endl;
 #endif
-				const Scalar diff = g_j - epsilon; // G_j - E
+				const double diff = g_j - epsilon; // G_j - E
 
-				const Scalar max = lambda > diff ? lambda : diff; //  max { L, G_j - E}
+				const double max = lambda > diff ? lambda : diff; //  max { L, G_j - E}
 
 				//	p_j = max { L, G_j - E}
 				prices[j] = max;
@@ -412,7 +411,7 @@ private:
 #endif
 				/** standard lambda scaling **/
 				size_t lowerThanLambda = 0;
-				Scalar newLambda = lambda;
+				double newLambda = lambda;
 
 				// if the number of objectes k with p_k < lambda is bigger than (rows - cols)
 				for (size_t k = 0; k < cols; k++)
@@ -448,7 +447,7 @@ private:
 	 * @return true if all prices of unassigned objects are below lambda, otherwise false
 	 */
 	static const bool unassignedObjectsLTlambda(const Locks & c,
-			const Scalars & prices, const Scalar lambda)
+			const Scalars & prices, const double lambda)
 	{
 		for (size_t j = 0; j < c.size(); ++j)
 			if (!c[j] && prices[j] > lambda)
