@@ -23,8 +23,7 @@ class MurtyMiller
 {
 public:
 
-    typedef Eigen::Matrix<double, -1, -1> WeightMatrix;
-    typedef Eigen::Matrix<size_t, -1, -1> AssignmentMatrix;
+    typedef Eigen::MatrixXd WeightMatrix;
     typedef typename Auction::Edge Edge;
     typedef typename Auction::Edges Edges;
 

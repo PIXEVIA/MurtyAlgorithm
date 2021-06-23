@@ -25,7 +25,7 @@ private:
     virtual ~Auction(){}
 public:
 
-    typedef Eigen::Matrix<double, -1, -1> WeightMatrix;
+    typedef Eigen::MatrixXd WeightMatrix;
 
     /**
      * solver modes for association problem
@@ -72,7 +72,7 @@ public:
 	 */
 	typedef std::vector<size_t> indices;
 
-	static const Edges solve(const Eigen::Matrix<double, -1, -1> & a)
+	static const Edges solve(const Eigen::MatrixXd & a)
 	{
 		const size_t rows = a.rows();
 		const size_t cols = a.cols();
@@ -143,7 +143,7 @@ private:
 	 * @param epsilon bidding increment
 	 * @return true if assignment was made, false otherwise
 	 */
-	static bool forward(const Eigen::Matrix<double, -1, -1> & a, Edges & E,
+	static bool forward(const Eigen::MatrixXd & a, Edges & E,
 			Scalars & prices, Scalars & profits, Locks & lockedRows,
 			Locks & lockedCols, double & lambda, double & epsilon)
 	{
@@ -285,7 +285,7 @@ private:
 	 * @param epsilon bidding increment
 	 * @return true if assignment was made, false otherwise
 	 */
-	static bool reverse(const Eigen::Matrix<double, -1, -1> & a, Edges & E,
+	static bool reverse(const Eigen::MatrixXd & a, Edges & E,
 			Scalars & prices, Scalars & profits, Locks & lockedRows,
 			Locks & lockedCols, double & lambda, const double & epsilon)
 	{
