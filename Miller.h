@@ -111,7 +111,7 @@ public:
         }
         if ( mBest < kBest ) kBest = mBest;
 
-        std::cout << "kBest = " << kBest << std::endl;
+        // std::cout << "kBest = " << kBest << std::endl;
 
         Edges edges = Auction<Scalar>::solve(w); // make initial (best) assignment
 
