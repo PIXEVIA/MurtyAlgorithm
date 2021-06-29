@@ -97,21 +97,15 @@ public:
             return resultingEdges;
         }
 
-        size_t kBest = 0;
+        size_t kBest = mBest;
 
-        const size_t maxComb = ( rows > cols ) ? rows : cols;
-        // if rows! < mBest ...
-        switch (maxComb)
-        {
-        case 1 : kBest = 1; break;
-        case 2 : kBest = 2; break;
-        case 3 : kBest = 6; break;
-        case 4 : kBest = 24; break;
-        default: kBest = mBest; break;
+        const size_t biggerDim = ( rows >= cols ) ? rows : cols;
+        const size_t smallerDim = ( rows >= cols ) ? cols : rows;
+        size_t maxComb = 1;  // = (bigger)!/(bigger-smaller)!
+        for (size_t i = 0; i < smallerDim; ++i) {
+            maxComb = maxComb * (biggerDim - i);
         }
-        if ( mBest < kBest ) kBest = mBest;
-
-        // std::cout << "kBest = " << kBest << std::endl;
+        if ( maxComb < kBest ) kBest = maxComb;
 
         Edges edges = Auction<Scalar>::solve(w); // make initial (best) assignment
 
