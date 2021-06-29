@@ -121,8 +121,7 @@ public:
         PartitionsPriorityQueue priorityQueue, answerList;
         priorityQueue.push(init);
 
-        // assume values between 0 and 1 !
-        const Scalar lockingValue = 0.;
+        const Scalar lockingValue = __AUCTION_OMIT;
 
         while ( !priorityQueue.empty() && answerList.size() < kBest )
         {

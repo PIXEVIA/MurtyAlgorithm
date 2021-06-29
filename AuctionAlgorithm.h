@@ -13,8 +13,7 @@
 
 #define __AUCTION_EPSILON_MULTIPLIER 1e-5
 #define __AUCTION_INF 1e8
-//#define __AUCTION_OMIT_ZEROS
-#define __AUCTION_ZERO 0.
+#define __AUCTION_OMIT -999.  // Assume true values are >=0
 
 template<typename Scalar = double>
 class Auction
@@ -184,9 +183,8 @@ private:
 			for (size_t j = 0; j < cols; j++) // for the j-th column
 			{
 				const Scalar aij = a(i,j);
-#ifndef __AUCTION_OMIT_ZEROS
-				if ( aij == __AUCTION_ZERO ) continue;
-#endif
+				if ( aij == __AUCTION_OMIT ) continue;
+
 				const Scalar diff = aij - prices[j];
 #ifdef __AUCTION_DEBUG
 			__A_FORWARD_LOG << "  col " << j << " diff = " << diff << std::endl;
@@ -322,9 +320,8 @@ private:
 			for (size_t i = 0; i < rows; i++) // for the j-th column
 			{
 				const Scalar aij = a(i, j);
-#ifndef __AUCTION_OMIT_ZEROS
-				if ( aij == __AUCTION_ZERO ) continue;
-#endif
+				if ( aij == __AUCTION_OMIT ) continue;
+
 				const Scalar diff = aij - profits[i];
 				if (diff > b_j)
 				{
